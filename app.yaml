@@ -1,0 +1,20 @@
+# In this file you specify which python files are part of your
+# application, and you define its ID.
+
+application: cfp-manager
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+# How  to handle URLs? On a coarse level you define it here, on
+# a more fine-grained level you will then define it in your python code
+handlers:
+
+# static files, e.g. images, CSS and JS files
+- url: /static
+  static_dir: static
+
+# dynamic files, to be served by object named "app" in file "main.py"
+- url: .*
+  script: main.app
