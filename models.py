@@ -8,16 +8,25 @@ Review - a review by a reviewer for a talk proposal (child of Talk)
 """
 
 from google.appengine.ext import ndb
+from protorpc import messages
 
 class Conference(ndb.Model):
-    name = ndb.StringProperty()
+    name = ndb.StringProperty(required=True)
     subtitle = ndb.StringProperty()
-    key = ndb.StringProperty()
     cfpDateFrom = ndb.DateProperty()
     cfpDateTo = ndb.DateProperty()
     details = ndb.TextProperty()
     reviewers = ndb.StringProperty(repeated=True)
 
+class ConferenceForm(messages.Message):
+    name = messages.StringField(1, required=True)
+    subtitle = messages.StringField(2)
+    id = messages.StringField(3, required=True)
+    cfpDateFrom = messages.StringField(4)
+    cfpDateTo = messages.StringField(5)
+    details = messages.BytesField(6)
+    reviewers = messages.StringField(7, repeated=True)
+    
 class Speaker(ndb.Model):
     name = ndb.StringProperty()
     email = ndb.StringProperty()

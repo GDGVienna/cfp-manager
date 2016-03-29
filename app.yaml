@@ -11,6 +11,10 @@ threadsafe: yes
 # a more fine-grained level you will then define it in your python code
 handlers:
 
+# Endpoints handler
+- url: /_ah/spi/.*
+  script: main.api
+
 # static files, e.g. images, CSS and JS files
 - url: /static
   static_dir: static
@@ -18,3 +22,11 @@ handlers:
 # dynamic files, to be served by object named "app" in file "main.py"
 - url: .*
   script: main.app
+
+libraries:
+
+- name: webapp2
+  version: latest
+
+- name: endpoints
+  version: latest
