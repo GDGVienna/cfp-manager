@@ -3,6 +3,7 @@
 import webapp2
 import urllib
 import json
+from datetime import datetime
 from google.appengine.ext import ndb
 
 from models import Conference
@@ -20,8 +21,8 @@ class ProposalHandler(webapp2.RequestHandler):
             self.response.headers["Content-Type"] = "application/json"
             self.response.out.write(json.dumps({"message":"success"}))
         else:
-            successUrl = self.request.get("success-url")
-            redirect(successUrl)
+            successUrl = str(self.request.get("success-url"))
+            webapp2.redirect(successUrl, response=self.response)
 
     def error(self, text, status):
         """Error handling"""
@@ -31,13 +32,13 @@ class ProposalHandler(webapp2.RequestHandler):
             self.response.headers["Content-Type"] = "application/json"
             self.response.out.write(json.dumps({"message":text}))
         else:
-            errorUrl = self.request.get("error-url")
+            errorUrl = str(self.request.get("error-url"))
             if "?" in errorUrl:
                 errorUrl = errorUrl + "&"
             else:
                 errorUrl = errorUrl + "?"
             errorUrl = errorUrl + "message=" + urllib.quote(text, safe="")
-            redirect(errorUrl)
+            webapp2.redirect(errorUrl, response=self.response)
 
     def post(self, confid):
         """Accept proposals via POST requests"""
@@ -49,12 +50,15 @@ class ProposalHandler(webapp2.RequestHandler):
         useOld = self.request.get("use-old")
         title = self.request.get("title")
         abstract = self.request.get("abstract")
-        duration = self.request.get("duration")
+        duration = int(self.request.get("duration"))
         comment = self.request.get("comment")
+        # timestamp 'now'
+        now = datetime.now()
         # search for conference
         conference = Conference.get_by_id(confid)
         if not conference:
             self.error("Conference not found", 404)
+            return
         # search for speaker?
         speakerKey = None
         if useOld:
@@ -67,12 +71,13 @@ class ProposalHandler(webapp2.RequestHandler):
                 speakerKey = speaker.key
         if not speakerKey:
             # create speaker object
-            speaker = Speaker(name=name, email=email, bio=bio)
+            speaker = Speaker(name=name, email=email, bio=bio,
+                              created=now, modified=now)
             speakerKey = speaker.put()
         # submit proposal
         proposal = Proposal(parent=conference.key, speaker=speakerKey,
-                            abstract=abstract, duraction=duration,
-                            comment=comment)
+                            abstract=abstract, duration=duration,
+                            comment=comment, created=now, modified=now)
         proposalKey = proposal.put()
         if proposalKey:
             self.success()

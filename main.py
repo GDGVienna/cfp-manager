@@ -8,8 +8,8 @@ from speaker import SpeakerHandler
 
 app = webapp2.WSGIApplication([
     # here the web routes will be listed
-    ('/proposal/<confid>', ProposalHandler),
-    ('/speaker/<email>', SpeakerHandler),
+    ('/proposal/(.*)', ProposalHandler),
+    ('/email/(.*)', SpeakerHandler),
 ], debug=True)
 
 api = endpoints.api_server([CfpManagerApi])  # register API
