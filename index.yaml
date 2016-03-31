@@ -1,0 +1,7 @@
+indexes:
+
+- kind: Speaker
+  properties:
+  - name: email
+  - name: modified
+    direction: desc

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-2.2.2.min.js">
+  </script>
+  <title>Submit Talk Proposal</title>
+</head>
+<body>
+  <h1>Submit Talk Proposal</h1>
+  <style type="text/css">
+  .hidden { display:none; }
+  .gray { font-color:gray; }
+  </style>
+  <script>
+    function doSubmit() {
+      var success = function() {
+        alert("All OK!");
+      };
+      var failure = function(txt) {
+        alert("Failure: " + txt);
+      };
+      submitProposal(success, failure);
+    }
+    function submitProposal(success, failure) {
+      // get all values
+      var confId = $('#conf-id').val();
+      var name = $('#name').val();
+      var email = $('#email').val();
+      var title = $('#title').val();
+      var duration = $('#duration').val();
+      var abstract = $('#info').val();
+      var old = $('#old').prop('checked');
+      var bio = $('#bio').val();
+      var comment = $('#comment').val();
+      // check required fields
+      if (!confId) {
+        failure('Conference ID has to be provided');
+        return;
+      }
+      if (!name && !old) {
+        failure('Your name has to be provided');
+        return;
+      }
+      if (!email) {
+        failure('Your email has to be provided');
+        return;
+      }
+      if (!title) {
+        failure('The talk title has to be provided');
+        return;
+      }
+      // dealing with person: either get old record
+      if (old) {
+        $.get('https://cfp-manager.appspot.com/_ah/api/manager/v1/speaker/by_email/' + encodeURIComponent(email)
+          ).fail(function() {
+            // version 2: add speaker first
+            submitSpeaker(confId, name, email, bio, title, durartion, abstract, comment, success, failure);
+          }
+          ).done(function(data) {
+            // we found the speaker and his/her key
+            submitTalkOnly(confId, data.key, title, duration, abstract, comment, success, failure);
+          });
+      }
+      // or submitting the speaker immediately
+      else {
+        submitSpeaker(confId, name, email, bio, title, durartion, abstract, comment, success, failure);
+      }
+    }
+    function submitSpeaker(confId, name, email, bio, title, duration, abstract, comment, success, failure) {
+      $.ajax({
+          url: 'https://cfp-manager.appspot.com/_ah/api/manager/v1/speaker',
+          data: JSON.stringify({email: email, name: name, bio: bio}),
+          contentType: 'application/json',
+          type: 'POST'
+        }).fail(function() {
+          failure("COuld not add speaker");
+        }
+        ).done(function(data) {
+          // now submit proposal
+          submitTalkOnly(confId, data.key, title, duration, abstract, comment, success, failure);
+        });
+    }
+    function submitTalkOnly(confId, speakerKey, title, duration, abstract, comment, success, failure) {
+      $.ajax({
+          url: 'https://cfp-manager.appspot.com/_ah/api/manager/v1/conference/'
+             + encodeURIComponent(confId) + '/proposal',
+          data: JSON.stringify({speaker: speakerKey, title: title, duration: duration, abstract: abstract, comment: comment}),
+          contentType: 'application/json',
+          type: 'POST'
+        }).fail(function() {
+          failure("Could not submit proposal");
+        }
+        ).done(success);
+    }
+    function checkEmail() {
+      // get current email value
+      var email = $('#email').val();
+      // check if email exists
+      $.get('https://cfp-manager.appspot.com/_ah/api/manager/v1/speaker/by_email/' + encodeURIComponent(email)
+        ).fail(function() {
+          // disable all 'choose old' functionality
+          $('#bio-group').removeClass('gray');
+          $('#old-group').addClass('hidden');
+          $('#old').prop('checked', false);
+          $('#bio').prop('disabled', false);
+        }
+        ).done(function() {
+          // enable 'choose old' functionality
+          $('#bio-group').addClass('gray');
+          $('#old-group').removeClass('hidden');
+          $('#old').prop('checked', true);
+          $('#bio').prop('disabled', true);
+        });
+    }
+    function checkOld() {
+      // get current value of 'old'
+      var old = $('#old').prop('checked');
+      $('#bio').prop('disabled', old);
+      if (old) {
+        $('#bio-group').addClass('gray');
+      }
+      else {
+        $('#bio-group').removeClass('gray');
+      }
+    }
+    $(function() {
+      // enable handling of 'old' for bio
+      $('#old').change(checkOld);
+      // enable handling of email check
+      $('#email').change(checkEmail);
+      // get list of current conferences
+      $.ajax('https://cfp-manager.appspot.com/_ah/api/manager/v1/conference'
+        ).success(function(data) {
+          // set the conferences returned
+          $.each(data.items, function(index, value){
+            $('#conf-id').append($('<option></option>')
+              .attr("value", value.id)
+              .text(value.name + " - " + value.subtitle));
+          });
+        });
+    });
+  </script>
+  <form onsubmit="doSubmit(); return false;">
+    <fieldset class="form-group">
+      <label for="conf-id">Conference</label>
+      <select required="required" id="conf-id">
+        <!-- will be autofilled -->
+      </select>
+    </fieldset>
+    <fieldset class="form-group">
+      <label for="name">Your Name</label>
+      <input type="text" required="required" id="name">
+    </fieldset>
+    <fieldset class="form-group">
+      <label for="email">Your Email</label>
+      <input type="text" required="required" id="email">
+    </fieldset>
+    <fieldset class="form-group">
+      <label for="title">Title of the talk</label>
+      <input type="text" required="required" id="title">
+    </fieldset>
+    <fieldset class="form-group">
+      <label for="duration">Duration</label>
+      <select required="required" id="duration">
+        <option value='20'>20 Minutes</option>
+        <option value='45'>45 Minutes</option>
+      </select>
+    </fieldset>
+    <fieldset class="form-group">
+      <label for="info">Short abstract</label>
+      <textarea id="info"></textarea>
+    </fieldset>
+    <fieldset id='old-group' class="form-group hidden">
+      <label for="old">Take bio from last proposal</label>
+      <input type="checkbox" id="old">
+    </fieldset>
+    <fieldset id='bio-group' class="form-group">
+      <label for="bio">Short biography</label>
+      <textarea id="bio"></textarea>
+    </fieldset>
+    <fieldset class="form-group">
+      <label for="comment">Any other comment?</label>
+      <textarea id="comment"></textarea>
+    </fieldset>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</body>
+</html>
