@@ -18,6 +18,9 @@ class ProposalHandler(webapp2.RequestHandler):
         if jsonReply:
             self.response.set_status(200)
             self.response.headers["Content-Type"] = "application/json"
+            self.response.headers.add_header(
+                "Access-Control-Allow-Origin", "*"
+            )
             self.response.out.write(json.dumps({"message": "success"}))
         else:
             successUrl = str(self.request.get("success-url"))
@@ -29,6 +32,9 @@ class ProposalHandler(webapp2.RequestHandler):
         if jsonReply:
             self.response.set_status(status)
             self.response.headers["Content-Type"] = "application/json"
+            self.response.headers.add_header(
+                "Access-Control-Allow-Origin", "*"
+            )
             self.response.out.write(json.dumps({"message": text}))
         else:
             errorUrl = str(self.request.get("error-url"))
