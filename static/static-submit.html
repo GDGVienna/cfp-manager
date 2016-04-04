@@ -29,20 +29,20 @@
           // disable all 'choose old' functionality
           $('#bio-group').removeClass('gray');
           $('#old-group').addClass('hidden');
-          $('#old').prop('checked', false);
+          $('#use-old').prop('checked', false);
           $('#bio').prop('disabled', false);
         }
         ).done(function() {
           // enable 'choose old' functionality
           $('#bio-group').addClass('gray');
           $('#old-group').removeClass('hidden');
-          $('#old').prop('checked', true);
+          $('#use-old').prop('checked', true);
           $('#bio').prop('disabled', true);
         });
       }
       function checkOld() {
       // get current value of 'old'
-      var old = $('#old').prop('checked');
+      var old = $('#use-old').prop('checked');
       $('#bio').prop('disabled', old);
       if (old) {
         $('#bio-group').addClass('gray');
@@ -53,7 +53,7 @@
     }
     $(function() {
       // enable handling of 'old' for bio
-      $('#old').change(checkOld);
+      $('#use-old').change(checkOld);
       // enable handling of email check
       $('#email').change(checkEmail);
     });
