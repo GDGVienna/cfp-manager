@@ -4,7 +4,6 @@ import webapp2
 import urllib
 import json
 from datetime import datetime
-from google.appengine.ext import ndb
 
 from models import Conference
 from models import Speaker
@@ -19,7 +18,7 @@ class ProposalHandler(webapp2.RequestHandler):
         if jsonReply:
             self.response.set_status(200)
             self.response.headers["Content-Type"] = "application/json"
-            self.response.out.write(json.dumps({"message":"success"}))
+            self.response.out.write(json.dumps({"message": "success"}))
         else:
             successUrl = str(self.request.get("success-url"))
             webapp2.redirect(successUrl, response=self.response)
@@ -30,7 +29,7 @@ class ProposalHandler(webapp2.RequestHandler):
         if jsonReply:
             self.response.set_status(status)
             self.response.headers["Content-Type"] = "application/json"
-            self.response.out.write(json.dumps({"message":text}))
+            self.response.out.write(json.dumps({"message": text}))
         else:
             errorUrl = str(self.request.get("error-url"))
             if "?" in errorUrl:
@@ -43,8 +42,8 @@ class ProposalHandler(webapp2.RequestHandler):
     def post(self, confid):
         """Accept proposals via POST requests"""
         # get parameters from request
-        successUrl = self.request.get("success-url")
         name = self.request.get("name")
+        surname = self.request.get("surname")
         email = self.request.get("email")
         bio = self.request.get("bio")
         useOld = self.request.get("use-old")
@@ -71,13 +70,14 @@ class ProposalHandler(webapp2.RequestHandler):
                 speakerKey = speaker.key
         if not speakerKey:
             # create speaker object
-            speaker = Speaker(name=name, email=email, bio=bio,
-                              created=now, modified=now)
+            speaker = Speaker(name=name, surname=surname, email=email,
+                              bio=bio, created=now, modified=now)
             speakerKey = speaker.put()
         # submit proposal
         proposal = Proposal(parent=conference.key, speaker=speakerKey,
                             abstract=abstract, duration=duration,
-                            comment=comment, created=now, modified=now)
+                            title=title, comment=comment, created=now,
+                            modified=now)
         proposalKey = proposal.put()
         if proposalKey:
             self.success()

@@ -53,8 +53,9 @@ class ConferencePublicForms(messages.Message):
 
 class Speaker(ndb.Model):
     """A (hopeful) speaker at a conference."""
-    name = ndb.StringProperty()
-    email = ndb.StringProperty()
+    name = ndb.StringProperty(required=True)
+    surname = ndb.StringProperty(required=True)
+    email = ndb.StringProperty(required=True)
     bio = ndb.TextProperty()
     created = ndb.DateTimeProperty()
     modified = ndb.DateTimeProperty()
@@ -63,8 +64,9 @@ class Speaker(ndb.Model):
 class SpeakerForm(messages.Message):
     """Inbound form for creating a new speaker record."""
     name = messages.StringField(1, required=True)
-    email = messages.StringField(2, required=True)
-    bio = messages.StringField(3)
+    surname = messages.StringField(2, required=True)
+    email = messages.StringField(3, required=True)
+    bio = messages.StringField(4)
 
 
 class SpeakerKeyForm(messages.Message):
@@ -75,8 +77,8 @@ class SpeakerKeyForm(messages.Message):
 
 class Proposal(ndb.Model):
     """A proposal for a call for papers."""
-    title = ndb.StringProperty()
-    speaker = ndb.KeyProperty(kind=Speaker)
+    title = ndb.StringProperty(required=True)
+    speaker = ndb.KeyProperty(kind=Speaker, required=True)
     abstract = ndb.TextProperty()
     duration = ndb.IntegerProperty()
     comment = ndb.TextProperty()

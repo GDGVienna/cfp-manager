@@ -83,7 +83,7 @@ class CfpManagerApi(remote.Service):
         http_method='POST', name='createConference')
     def createConference(self, request):
         """Create a new Conference object"""
-        if users.is_current_user_admin() or True:
+        if users.is_current_user_admin():
             # we only allow an admin user to create a conference
             if not request.name or not request.id:
                 raise endpoints.BadRequestException(
@@ -114,9 +114,9 @@ class CfpManagerApi(remote.Service):
         http_method='POST', name='createSpeaker')
     def createSpeaker(self, request):
         """Create a new speaker object"""
-        if not request.email or not request.name:
+        if not request.email or not request.name or not request.surname:
             raise endpoints.BadRequestException(
-                "Required field (name and/or email) missing"
+                "Required field (name, surname and/or email) missing"
             )
         data = {field.name: getattr(request, field.name)
                 for field in request.all_fields()}

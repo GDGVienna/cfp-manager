@@ -1,15 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://code.jquery.com/jquery-2.2.2.min.js">
-  </script>
+  <script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
   <title>Submit Talk Proposal</title>
 </head>
 <body>
   <h1>Submit Talk Proposal</h1>
   <style type="text/css">
-  .hidden { display:none; }
-  .gray { font-color:gray; }
+    .hidden { display:none; }
+    .gray { font-color:gray; }
+    label {min-width: 200px;}
   </style>
   <script>
     function checkEmail() {
@@ -31,8 +39,8 @@
           $('#old').prop('checked', true);
           $('#bio').prop('disabled', true);
         });
-    }
-    function checkOld() {
+      }
+      function checkOld() {
       // get current value of 'old'
       var old = $('#old').prop('checked');
       $('#bio').prop('disabled', old);
@@ -54,8 +62,12 @@
     <input type="hidden" name="success-url" value="/static/static-success.html">
     <input type="hidden" name="error-url" value="/static/static-error.html">
     <fieldset class="form-group">
-      <label for="name">Your Name</label>
+      <label for="name">Your First Name</label>
       <input type="text" required="required" id="name" name="name">
+    </fieldset>
+    <fieldset class="form-group">
+      <label for="surname">Your Surname</label>
+      <input type="text" required="required" id="surname" name="surname">
     </fieldset>
     <fieldset class="form-group">
       <label for="email">Your Email</label>
@@ -68,6 +80,7 @@
     <fieldset class="form-group">
       <label for="duration">Duration</label>
       <select required="required" id="duration" name="duration">
+        <option value=''>--- please select ---</option>
         <option value='20'>20 Minutes</option>
         <option value='45'>45 Minutes</option>
       </select>
