@@ -3,7 +3,7 @@
 import endpoints
 from datetime import datetime
 from google.appengine.ext import ndb
-from google.appengine.api import users
+from google.appengine.api import oauth
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
@@ -83,7 +83,8 @@ class CfpManagerApi(remote.Service):
         http_method='POST', name='createConference')
     def createConference(self, request):
         """Create a new Conference object"""
-        if users.is_current_user_admin():
+        user = endpoints.get_current_user()
+        if user.email() and oauth.is_current_user_admin():
             # we only allow an admin user to create a conference
             if not request.name or not request.id:
                 raise endpoints.BadRequestException(

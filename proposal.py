@@ -3,7 +3,9 @@
 import webapp2
 import urllib
 import json
+import os
 from datetime import datetime
+from urlparse import urljoin
 
 from models import Conference
 from models import Speaker
@@ -12,6 +14,11 @@ from settings import *
 
 
 class ProposalHandler(webapp2.RequestHandler):
+    def getUrl(self, url):
+        """Construct a full URL from one starting with /"""
+        referer = os.environ.get('HTTP_REFERER')
+        return urljoin(referer, url)
+
     def success(self):
         """Success return"""
         jsonReply = self.request.get("json-reply")
@@ -24,7 +31,7 @@ class ProposalHandler(webapp2.RequestHandler):
             self.response.out.write(json.dumps({"message": "success"}))
         else:
             successUrl = str(self.request.get("success-url"))
-            webapp2.redirect(successUrl, response=self.response)
+            webapp2.redirect(self.getUrl(successUrl), response=self.response)
 
     def error(self, text, status):
         """Error handling"""
@@ -43,7 +50,7 @@ class ProposalHandler(webapp2.RequestHandler):
             else:
                 errorUrl = errorUrl + "?"
             errorUrl = errorUrl + "message=" + urllib.quote(text, safe="")
-            webapp2.redirect(errorUrl, response=self.response)
+            webapp2.redirect(self.getUrl(errorUrl), response=self.response)
 
     def post(self, confid):
         """Accept proposals via POST requests"""
