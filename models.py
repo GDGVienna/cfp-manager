@@ -21,6 +21,7 @@ class Conference(ndb.Model):
     cfpDateTo = ndb.DateProperty()
     details = ndb.TextProperty()
     reviewers = ndb.StringProperty(repeated=True)
+    secret = ndb.StringProperty()
     created = ndb.DateTimeProperty()
     modified = ndb.DateTimeProperty()
 
@@ -34,6 +35,7 @@ class ConferenceForm(messages.Message):
     cfpDateTo = messages.StringField(5)
     details = messages.StringField(6)
     reviewers = messages.StringField(7, repeated=True)
+    secret = messages.StringField(8)
 
 
 class ConferencePublicForm(messages.Message):
