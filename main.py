@@ -11,7 +11,7 @@ app = webapp2.WSGIApplication([
     # here the web routes will be listed
     ('/proposal/(.*)', ProposalHandler),
     ('/email/(.*)', SpeakerHandler),
-    ('/backup/(.*)', BackupHandler),
+    ('/backup/(.*)/(.*)', BackupHandler),
 ], debug=True)
 
 api = endpoints.api_server([CfpManagerApi])  # register API

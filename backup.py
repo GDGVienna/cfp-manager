@@ -22,12 +22,12 @@ class DatastoreEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 class BackupHandler(webapp2.RequestHandler):
-    def get(self, confid):
+    def get(self, confid, secret):
         """Download all speakers and proposals for a conference"""
         # get conference
         conference = Conference.get_by_id(confid)
         # check if the provided secret is correct
-        if conference.secret != self.request.get("secret"):
+        if conference.secret != secret:
             self.response.http_status_message(403)
             return
         speakers = Speaker.query()
