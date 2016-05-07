@@ -104,5 +104,6 @@ class ProposalKeyForm(messages.Message):
 
 
 class Review(ndb.Model):
-    reviewer = ndb.StringProperty()
+    """Single review - id is email of user, ancestor is proposal or speaker."""
+    comment = ndb.StringProperty()
     rating = ndb.IntegerProperty()

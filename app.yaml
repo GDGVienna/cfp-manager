@@ -30,3 +30,6 @@ libraries:
 
 - name: endpoints
   version: latest
+
+- name: jinja2
+  version: latest

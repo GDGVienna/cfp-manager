@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Conferences{% endblock %}
+{% block logout_url %}{{logout_url}}{% endblock %}
+{% block content %}
+    {% for conference in conferences %}
+      <form method='POST'>
+        <input type='hidden' name='id' value='{{conference.key.id()}}'>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <input id="{{conference.key.id()}}-name" class="mdl-textfield__input" name="name" value="{{conference.name}}">
+          <label for="{{conference.key.id()}}-name" class="mdl-textfield__label">Name</label><br>
+        </div>
+        <br>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <input id="{{conference.key.id()}}-subtitle" class="mdl-textfield__input" name="subtitle" value="{{conference.subtitle}}">
+          <label for="{{conference.key.id()}}-subtitle" class="mdl-textfield__label">Subtitle</label><br>
+        </div>
+        <br>
+        <div class="mdl-textfield mdl-js-textfield">
+          <textarea type="text" rows="2" id="{{conference.key.id()}}-reviewers" class="mdl-textfield__input" name="reviewers">{% for reviewer in conference.reviewers %}{{reviewer}}
+{% endfor %}</textarea>
+          <label class="mdl-textfield__label" for="{{conference.key.id()}}-reviewers">Reviewers</label>
+        </div>
+        <br>
+        <input type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+      </form>
+    {% endfor %}
+    <h2>Create new conference</h2>
+      <form method='POST'>
+        <label>Id
+        <input name='id'>
+        </label>
+        <label>Name
+        <input name='name'>
+        </label>
+        <label>Subtitle
+        <input name='subtitle'>
+        </label>
+        <label>Reviewers
+        <textarea name='reviewers'>
+        </textarea>
+        </label>
+        <input type="submit">
+      </form>
+{% endblock %}

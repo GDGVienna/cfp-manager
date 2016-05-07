@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Talk Proposals{% endblock %}
+{% block logout_url %}{{logout_url}}{% endblock %}
+{% block content %}
+  <style type="text/css">
+  .cfp-fixed-height div.mdl-card__supporting-text {
+    height: 200px;
+    overflow: none;
+  }
+  .cfp-fixed-height {
+    min-height: 280px;
+    min-width: 200px;
+  }
+  .cfp-fixed-height div.mdl-card__title * {
+    height: 64px;
+    text-overflow: ellipsis;
+  }
+  </style>
+  <div class="mdl-grid">
+  {% for proposal in proposals %}
+    <div id="crd-{{proposal.key.id()}}" class="mdl-cell mdl-cell--4-col cfp-fixed-height mdl-card mdl-shadow--4dp">
+      <div class="mdl-card__title">
+        <h4 class="mdl-card__title-text">{{proposal.title}}</h4>
+      </div>
+      <div class="mdl-card__supporting-text">
+        <p>Duration: {{proposal.duration}}min</p>
+        <p>{% for line in proposal.abstract.splitlines() %}
+      {{line}}<br>
+      {% endfor %}</p>
+      </div>
+      <div class="mdl-card__actions">
+        <button id="btn-{{proposal.key.id()}}" class="mdl-button mdl-button--accent mdl-js-button mdl-js-ripple-effect">Review</button>
+        {% if proposal.review %}<i class="material-icons">done</i>{% endif %}
+      </div>
+    </div>
+  {% endfor %}
+  </div>
+{% endblock %}
+{% block end %}
+  <style type="text/css">
+    dialog.mdl-dialog {
+      width: auto;
+    }
+    dialog.mdl-dialog div.mdl-dialog__actions {
+      flex-direction: row;
+      -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+    }
+  </style>
+  {% for proposal in proposals %}
+    <dialog class="mdl-dialog" id="dlg-{{proposal.key.id()}}">
+      <div class="mdl-dialog__content">
+        <h4>{{proposal.title}}</h4>
+        <p>Duration: {{proposal.duration}}min</p>
+        <p>{% for line in proposal.abstract.splitlines() %}
+             {{line}}<br>
+           {% endfor %}
+        </p>
+        <h6>Review</h6>
+        <div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <textarea type="text" rows="3" id="cmt-{{proposal.key.id()}}" class="mdl-textfield__input" name="comment">{% if proposal.review %}{{proposal.review.comment}}{% endif %}</textarea>
+            <label for="cmt-{{proposal.key.id()}}" class="mdl-textfield__label">Comment</label>
+          </div>
+          <br>
+          <button data-rating="-2" class="review-rating mdl-button mdl-button--fab mdl-button--mini-fab mdl-js-button mdl-button--icon {% if proposal.review and proposal.review.rating == -2 %}mdl-button--colored{% endif %}">
+            <i class="material-icons">exposure_neg_2</i>
+          </button>
+          <button data-rating="-1" class="review-rating mdl-button mdl-button--fab mdl-button--mini-fab mdl-js-button mdl-button--icon {% if proposal.review and proposal.review.rating == -1 %}mdl-button--colored{% endif %}">
+            <i class="material-icons">exposure_neg_1</i>
+          </button>
+          <button data-rating="0" class="review-rating mdl-button mdl-button--fab mdl-button--mini-fab mdl-js-button mdl-button--icon {% if proposal.review and proposal.review.rating == 0 %}mdl-button--colored{% endif %}">
+            <i class="material-icons">exposure_zero</i>
+          </button>
+          <button data-rating="1" class="review-rating mdl-button mdl-button--fab mdl-button--mini-fab mdl-js-button mdl-button--icon {% if proposal.review and proposal.review.rating == 1 %}mdl-button--colored{% endif %}">
+            <i class="material-icons">exposure_plus_1</i>
+          </button>
+          <button data-rating="2" class="review-rating mdl-button mdl-button--fab mdl-button--mini-fab mdl-js-button mdl-button--icon {% if proposal.review and proposal.review.rating == 2 %}mdl-button--colored{% endif %}">
+            <i class="material-icons">exposure_plus_2</i>
+          </button>
+          <br>
+        </div>
+      </div>
+      <div class="mdl-dialog__actions">
+        <form method="POST">
+        <input type="hidden" name="comment">
+        <input type="hidden" name="rating">
+        <input type="hidden" name="proposal_id" value="{{proposal.key.id()}}">
+        <input type="submit" class="mdl-button mdl-js-button mdl-button--colored mdl-button--raised review-submit" value="Submit">
+        <input type="reset" class="mdl-button mdl-js-button mdl-button--raised review-cancel" value="Cancel">
+        </form>
+      </div>
+    </dialog>
+  {% endfor %}
+  <script>
+    {% for proposal in proposals %}
+    (function() {
+      var dialog;
+      var card;
+      var button;
+      var ratings;
+      var submit;
+      var cancel;
+      var form;
+      dialog = document.querySelector('#dlg-{{proposal.key.id()}}');
+      card   = document.querySelector('#crd-{{proposal.key.id()}}');
+      button = document.querySelector('#btn-{{proposal.key.id()}}');
+      submit = dialog.querySelector('.review-submit');
+      cancel = dialog.querySelector('.review-cancel');
+      form   = dialog.querySelector('form');
+      ratings = dialog.querySelectorAll('button.review-rating');
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        form.comment.value = dialog.querySelector('textarea').value;
+        for (var i=0; i<ratings.length; i++) {
+          if (ratings[i].classList.contains('mdl-button--colored')) {
+            form.rating.value = ratings[i].getAttribute('data-rating');
+          }
+        }
+        form.submit();
+      });
+      cancel.addEventListener('click', function() {
+        form.reset();
+        dialog.close();
+      })
+      button.addEventListener('click', function() {
+        dialog.showModal();
+        submit.focus();
+      });
+      card.addEventListener('click', function() {
+        dialog.showModal();
+        submit.focus();
+      });
+      for (var i=0; i<ratings.length; i++) {
+        (function(x) {
+          ratings[x].addEventListener('click', function() {
+            for (var j=0; j<ratings.length; j++) {
+              if (x != j) {
+                ratings[j].classList.remove('mdl-button--colored');
+              }
+              else {
+                ratings[j].classList.add('mdl-button--colored');
+              }
+            }
+          });
+        })(i);
+      }
+    })();
+    {% endfor %}
+  </script>
+{% endblock %}
