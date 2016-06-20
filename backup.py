@@ -42,26 +42,38 @@ class BackupHandler(webapp2.RequestHandler):
         speakers_dict = [dict(s.to_dict(), **dict(id=s.key.id()))
                          for s in speakers]
         proposals_dict = []
+        # create a fast lookup table - reviews by parent
+        reviews_by_parent = {}
+        for r in reviews:
+            parent = r.key.parent()
+            rlist = reviews_by_parent[parent]
+            if rlist is None:
+                rlist = []
+            rlist.append(r)
+            reviews_by_parent[parent] = rlist
+        # crete a fast lookup table - speaker by key
+        speakers_by_id = {}
+        for s in speakers:
+            speakers_by_key[s.key] = s
         for p in proposals:
             p_dict = p.to_dict()
             p_dict['id'] = p.key.id()
             p_r = {}
             p_sum = 0
-            for r in reviews:
-                if r.key.parent() == p.key:
-                    p_r[r.key.id()] = r.to_dict()
-                    if r.rating:
-                        if r.key.id() in committee:
-                            # double the rating!
-                            p_sum = p_sum + r.rating
+            for r in reviews_by_parent[p.key]:
+                p_r[r.key.id()] = r.to_dict()
+                if r.rating:
+                    if r.key.id() in committee:
+                        # double the rating!
                         p_sum = p_sum + r.rating
-            for s in speakers:
-                if s.key == p.speaker:
-                    p_dict['speaker-email'] = s.email
-                    p_dict['speaker-name'] = s.name
-                    p_dict['speaker-surname'] = s.surname
-                    if s.rating:
-                        p_sum = p_sum + s.rating
+                    p_sum = p_sum + r.rating
+            s = speakers_by_key[p.speaker]
+            if s is not None:
+                p_dict['speaker-email'] = s.email
+                p_dict['speaker-name'] = s.name
+                p_dict['speaker-surname'] = s.surname
+                if s.rating:
+                    p_sum = p_sum + s.rating
             p_dict['reviews'] = p_r
             p_dict['rating'] = p_sum
             proposals_dict.append(p_dict)
