@@ -61,6 +61,7 @@ class Speaker(ndb.Model):
     bio = ndb.TextProperty()
     created = ndb.DateTimeProperty()
     modified = ndb.DateTimeProperty()
+    rating = ndb.IntegerProperty()
 
 
 class SpeakerForm(messages.Message):

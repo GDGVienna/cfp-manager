@@ -2,24 +2,20 @@
 
 import webapp2
 import jinja2
-import urllib
-import json
 import os
-from datetime import datetime
-from google.appengine.ext import ndb
 from google.appengine.api import users
 
 from models import Conference
-from models import Speaker
 from models import Proposal
 from models import Review
 
 from settings import *
 
 JINJA_ENVIRONMENT = jinja2.Environment(
-	loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'),
-	extensions=['jinja2.ext.autoescape'],
-	autoescape=True)
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'),
+    extensions=['jinja2.ext.autoescape'],
+    autoescape=True)
+
 
 class ReviewHandler(webapp2.RequestHandler):
     def get(self, confid):
@@ -28,23 +24,31 @@ class ReviewHandler(webapp2.RequestHandler):
             login_url = users.create_login_url(self.request.url)
             self.redirect(login_url)
             return
+        new_only = confid.startswith('new:')
+        if new_only:
+            confid = confid[4:]
         # get the conference
         conference = Conference.get_by_id(confid)
         # check if the user is an admin
         if user.email() not in conference.reviewers:
-        	self.response.out.write("You are not authorized")
-        	return
+            self.response.out.write("You are not authorized")
+            return
         # get existing proposals
         proposals = Proposal.query(ancestor=conference.key).fetch()
         # get existing reviews
         reviews = Review.query(ancestor=conference.key).fetch()
         # filter by this users
         reviews = [r for r in reviews if r.key.id() == user.email()]
+        proposals_reviewed = []
         # add the review to the matching proposal
         for r in reviews:
             for p in proposals:
                 if r.key.parent() == p.key:
                     p.review = r
+                    proposals_reviewed.append(p.key)
+        if new_only:
+            proposals = [p for p in proposals
+                         if p.key not in proposals_reviewed]
         # set of stuff to display in the template
         template_values = {
             'user': user,
@@ -64,6 +68,8 @@ class ReviewHandler(webapp2.RequestHandler):
             self.redirect(login_url)
             return
         # get the conference
+        if confid.startswith('new:'):
+            confid = confid[4:]
         conference = Conference.get_by_id(confid)
         # check if the user is an admin
         if user.email() not in conference.reviewers:
@@ -73,7 +79,8 @@ class ReviewHandler(webapp2.RequestHandler):
         proposal_id = long(self.request.get('proposal_id'))
         proposal = Proposal.get_by_id(id=proposal_id, parent=conference.key)
         if not proposal:
-            self.response.out.write("No proposal found for this id (" + str(proposal_id) + ")")
+            self.response.out.write("No proposal found for this id (" +
+                                    str(proposal_id) + ")")
             return
         # get existing review by this user
         review = Review.get_by_id(id=user.email(), parent=proposal.key)
@@ -87,4 +94,3 @@ class ReviewHandler(webapp2.RequestHandler):
         review.put()
         # redirect to get
         self.redirect(self.request.url)
-
